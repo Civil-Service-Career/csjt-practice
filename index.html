@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSJT Practice Tool</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f9f9f9;color:#111;font-size:15px;min-height:100vh}
+.page{display:none;padding:20px;max-width:620px;margin:0 auto}
+.page.on{display:block}
+#p-gate{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:30px 20px;max-width:420px;margin:0 auto}
+.gate-logo{font-size:28px;font-weight:800;color:#111;margin-bottom:6px;text-align:center}
+.gate-sub{font-size:14px;color:#888;margin-bottom:32px;text-align:center}
+.gate-label{font-size:13px;font-weight:600;color:#555;margin-bottom:6px;align-self:flex-start}
+.gate-input{width:100%;padding:13px 14px;font-size:15px;border:1.5px solid #ddd;border-radius:10px;outline:none;background:#fff;margin-bottom:10px}
+.gate-input:focus{border-color:#1D9E75}
+.gate-btn{width:100%;padding:14px;font-size:15px;font-weight:700;background:#111;color:#fff;border:none;border-radius:10px;cursor:pointer;margin-bottom:10px}
+.gate-btn:hover{background:#333}
+.gate-error{font-size:13px;color:#c0391b;text-align:center;min-height:18px}
+.gate-note{font-size:12px;color:#bbb;text-align:center;margin-top:16px;line-height:1.6}
+h1{font-size:22px;font-weight:700;margin-bottom:8px;line-height:1.3}
+h2{font-size:17px;font-weight:600;margin-bottom:6px}
+p{line-height:1.6;color:#444;margin-bottom:10px}
+.badge{display:inline-block;background:#e8f5ee;color:#0a6640;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:12px}
+.card{border:1px solid #e0e0e0;border-radius:12px;padding:16px;margin-bottom:12px;background:#fff}
+.feats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.feat{background:#f5f5f5;padding:6px 10px;border-radius:8px;font-size:13px;color:#555}
+.feat:before{content:"✓ ";color:#1D9E75;font-weight:700}
+.btn{display:block;width:100%;padding:13px;font-size:15px;font-weight:700;text-align:center;border:none;border-radius:10px;cursor:pointer;margin-bottom:8px}
+.btn-dark{background:#111;color:#fff}
+.btn-dark:hover{background:#333}
+.btn-dark:disabled{background:#ccc;cursor:not-allowed}
+.btn-outline{background:#fff;color:#555;border:1.5px solid #ddd}
+.btn-outline:hover{background:#f5f5f5}
+.small{font-size:12px;color:#aaa;text-align:center;margin-top:6px}
+.grade-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.gcard{border:1.5px solid #ddd;border-radius:10px;padding:12px;cursor:pointer;background:#fff}
+.gcard:hover{background:#f9f9f9}
+.gcard.sel{border:2px solid #1D9E75;background:#e8f5ee}
+.gname{font-weight:700;font-size:14px}
+.gdesc{font-size:12px;color:#888;margin-top:2px}
+.prog-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.prog-txt{font-size:13px;color:#888}
+.btag{background:#e8f5ee;color:#0a6640;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 10px;border-radius:20px}
+.pbar{height:4px;background:#eee;border-radius:2px;margin-bottom:16px}
+.pfill{height:100%;background:#1D9E75;border-radius:2px;transition:width .3s}
+.info-box{background:#f0faf5;border-left:3px solid #1D9E75;border-radius:8px;padding:12px 14px;margin-bottom:14px}
+.info-box p{margin:0;color:#333;font-size:13px;line-height:1.6}
+.scenario-box{background:#f5f5f5;border-left:3px solid #1D9E75;border-radius:8px;padding:12px 14px;margin-bottom:16px}
+.slbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#999;margin-bottom:5px}
+.scenario-box p{margin:0;color:#222;font-size:14px;line-height:1.6}
+.hint{background:#e8f5ee;border:1px solid #a8dcc0;border-radius:8px;padding:9px 12px;margin-bottom:14px;font-size:13px;color:#0a5c38}
+.legend{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
+.leg{padding:7px 4px;border-radius:8px;text-align:center}
+.leg-cp{background:#fce8e4}.leg-ie{background:#fef3e2}.leg-fe{background:#eaf3de}.leg-eff{background:#e8f5ee}
+.leg-title{font-size:11px;font-weight:700;line-height:1.3}
+.leg-cp .leg-title{color:#8b2a12}.leg-ie .leg-title{color:#7a4400}.leg-fe .leg-title{color:#3a6000}.leg-eff .leg-title{color:#0a5c38}
+.leg-desc{font-size:10px;color:#888;margin-top:2px}
+.opt{border:1.5px solid #ddd;border-radius:10px;margin-bottom:10px;overflow:hidden;background:#fff}
+.opt.r-eff{border:2px solid #1D9E75;background:#e8f5ee}
+.opt.r-fe{border:2px solid #5a8a00;background:#eaf3de}
+.opt.r-ie{border:2px solid #c07000;background:#fef3e2}
+.opt.r-cp{border:2px solid #c0391b;background:#fce8e4}
+.opt-top{display:flex;align-items:flex-start;gap:10px;padding:12px}
+.opt-letter{width:28px;height:28px;border-radius:50%;background:#eee;border:1px solid #ddd;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#666;flex-shrink:0}
+.opt.r-eff .opt-letter{background:#1D9E75;color:#fff;border-color:#1D9E75}
+.opt.r-fe .opt-letter{background:#5a8a00;color:#fff;border-color:#5a8a00}
+.opt.r-ie .opt-letter{background:#c07000;color:#fff;border-color:#c07000}
+.opt.r-cp .opt-letter{background:#c0391b;color:#fff;border-color:#c0391b}
+.opt-text{font-size:14px;line-height:1.5;padding-top:3px}
+.rated-strip{display:none;padding:5px 12px;font-size:12px;font-weight:700;color:#fff}
+.opt.r-eff .rated-strip{display:block;background:#1D9E75}
+.opt.r-fe .rated-strip{display:block;background:#5a8a00}
+.opt.r-ie .rated-strip{display:block;background:#c07000}
+.opt.r-cp .rated-strip{display:block;background:#c0391b}
+.rbtns{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid #eee}
+.rbtn{padding:9px 2px;font-size:11px;font-weight:600;text-align:center;cursor:pointer;border:none;background:#fff;color:#888;border-right:1px solid #eee;line-height:1.3}
+.rbtn:last-child{border-right:none}
+.rbtn:hover{background:#f5f5f5}
+.rbtn.a-cp{background:#c0391b;color:#fff}
+.rbtn.a-ie{background:#c07000;color:#fff}
+.rbtn.a-fe{background:#5a8a00;color:#fff}
+.rbtn.a-eff{background:#1D9E75;color:#fff}
+.sa-q{border:1.5px solid #ddd;border-radius:10px;padding:14px;margin-bottom:10px;background:#fff}
+.sa-qt{font-weight:600;font-size:14px;margin-bottom:10px;line-height:1.5;color:#111}
+.sa-lbls{display:flex;justify-content:space-between;font-size:11px;color:#999;margin-bottom:6px}
+.sa-nums{display:flex;gap:5px}
+.sa-num{flex:1;height:36px;border-radius:8px;border:1.5px solid #ddd;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#666;cursor:pointer}
+.sa-num.sel{background:#1D9E75;color:#fff;border-color:#1D9E75}
+.fb-banner{padding:12px 14px;border-radius:8px;margin-bottom:12px;font-size:14px;font-weight:700}
+.fb-correct{background:#e8f5ee;color:#0a5c38;border:1px solid #8dd4ae}
+.fb-partial{background:#fef3e2;color:#7a4400;border:1px solid #f0c060}
+.fb-wrong{background:#fce8e4;color:#7a1a06;border:1px solid #f0a090}
+.pills{margin-bottom:12px}
+.pills-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#999;margin-bottom:6px}
+.pill{display:inline-block;font-size:12px;font-weight:700;padding:4px 11px;border-radius:20px;margin:3px 4px 3px 0}
+.pill-eff{background:#e8f5ee;color:#0a5c38}
+.pill-fe{background:#eaf3de;color:#2d6800}
+.pill-ie{background:#fef3e2;color:#7a4400}
+.pill-cp{background:#fce8e4;color:#7a1a06}
+.coach{background:#f5f5f5;border-radius:10px;padding:14px;margin-bottom:12px}
+.coach-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#999;margin-bottom:8px}
+.coach p{font-size:14px;line-height:1.7;margin-bottom:8px;color:#222}
+.coach p:last-child{margin:0}
+.exps-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#999;margin-bottom:8px}
+.exp{padding:10px 13px;border-radius:8px;margin-bottom:6px;border-left:3px solid}
+.exp-eff{background:#e8f5ee;border-color:#1D9E75}
+.exp-fe{background:#eaf3de;border-color:#5a8a00}
+.exp-ie{background:#fef3e2;border-color:#c07000}
+.exp-cp{background:#fce8e4;border-color:#c0391b}
+.exp-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.exp-eff .exp-lbl{color:#0a5c38}.exp-fe .exp-lbl{color:#2d6800}.exp-ie .exp-lbl{color:#7a4400}.exp-cp .exp-lbl{color:#7a1a06}
+.exp p{font-size:13px;line-height:1.6;color:#333}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{background:#f5f5f5;border-radius:10px;padding:12px;text-align:center}
+.stat-v{font-size:24px;font-weight:800}
+.stat-l{font-size:12px;color:#888;margin-top:2px}
+.stat-g .stat-v{color:#0a5c38}.stat-m .stat-v{color:#7a4400}.stat-r .stat-v{color:#7a1a06}
+.ring{width:90px;height:90px;border-radius:50%;border:3px solid #1D9E75;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 16px}
+.ring-p{font-size:26px;font-weight:800}
+.ring-s{font-size:11px;color:#888}
+.note-box{background:#f5f5f5;border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:#666;line-height:1.6}
+.loading{display:flex;align-items:center;gap:10px;padding:14px;background:#f5f5f5;border-radius:10px;font-size:14px;color:#888}
+.spin{width:18px;height:18px;border:2px solid #ddd;border-top-color:#1D9E75;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div id="p-gate" class="page on">
+  <div class="gate-logo">CSJT Practice</div>
+  <div class="gate-sub">Civil Service Judgement Test · Official Format</div>
+  <div style="width:100%">
+    <div class="gate-label">Access password</div>
+    <input class="gate-input" type="password" id="pw-input" placeholder="Enter your password" onkeydown="if(event.key==='Enter')checkPw()">
+    <button class="gate-btn" onclick="checkPw()">Access the tool →</button>
+    <div class="gate-error" id="pw-error"></div>
+  </div>
+  <div class="gate-note">Password included in your purchase confirmation.<br>Questions? Contact us via your order confirmation.</div>
+</div>
+
+<div id="p-landing" class="page">
+  <div style="text-align:center;margin-bottom:16px">
+    <div class="badge">UK Civil Service Preparation</div>
+    <h1>Master the Civil Service Judgement Test</h1>
+    <p>Accurate to the official CSJT format. All four grades — 9 scenarios each across 6 behaviours — with AI-powered coaching feedback.</p>
+  </div>
+  <div class="card">
+    <div class="feats">
+      <div class="feat">AO/AA — 9 scenarios</div>
+      <div class="feat">EO — 9 scenarios</div>
+      <div class="feat">HEO — 9 scenarios</div>
+      <div class="feat">SEO — 9 scenarios</div>
+      <div class="feat">Part 1 self-assessment</div>
+      <div class="feat">AI coaching per scenario</div>
+      <div class="feat">Duplicate ratings included</div>
+      <div class="feat">All 6 CS Behaviours</div>
+    </div>
+  </div>
+  <button class="btn btn-dark" onclick="go('p-grade')">Start practice →</button>
+</div>
+
+<div id="p-grade" class="page">
+  <h2>Select your target grade</h2>
+  <p>Scenarios and complexity are tailored to your job level.</p>
+  <div class="grade-grid">
+    <div class="gcard" id="gc-AO" onclick="pickGrade('AO')"><div class="gname">AO / AA</div><div class="gdesc">9 scenarios · 6 behaviours</div></div>
+    <div class="gcard" id="gc-EO" onclick="pickGrade('EO')"><div class="gname">EO</div><div class="gdesc">9 scenarios · 6 behaviours</div></div>
+    <div class="gcard" id="gc-HEO" onclick="pickGrade('HEO')"><div class="gname">HEO</div><div class="gdesc">9 scenarios · 6 behaviours</div></div>
+    <div class="gcard" id="gc-SEO" onclick="pickGrade('SEO')"><div class="gname">SEO</div><div class="gdesc">9 scenarios · 6 behaviours</div></div>
+  </div>
+  <button class="btn btn-dark" id="btn-grade" disabled onclick="startPart1()">Begin test →</button>
+</div>
+
+<div id="p-part1" class="page">
+  <div class="info-box"><p><strong>Part 1 of 2 · counts for 15% of your score</strong><br>Rate each statement from 1 (Completely Disagree) to 7 (Completely Agree). There are no right or wrong answers.</p></div>
+  <div id="sa-qs"></div>
+  <button class="btn btn-dark" id="btn-sa" disabled onclick="submitSA()">Continue to Part 2 →</button>
+</div>
+
+<div id="p-part1-fb" class="page">
+  <div class="info-box"><p><strong>Part 1 complete</strong><br>No right or wrong answers. The notes below explain what each statement explores about your work preferences.</p></div>
+  <div id="sa-fb"></div>
+  <button class="btn btn-dark" onclick="startPart2()">Begin Part 2 — Scenarios →</button>
+</div>
+
+<div id="p-test" class="page">
+  <div class="prog-row">
+    <span class="prog-txt" id="t-prog">Scenario 1 of 9</span>
+    <span class="btag" id="t-beh">Behaviour</span>
+  </div>
+  <div class="pbar"><div class="pfill" id="t-fill" style="width:11%"></div></div>
+  <div class="info-box"><p><strong>Part 2 · counts for 85% of your score</strong><br>Read the scenario then rate each action independently using the scale below.</p></div>
+  <div class="scenario-box"><div class="slbl">Scenario</div><p id="t-scenario"></p></div>
+  <div class="hint">You may give the same rating to more than one action — rate each one independently on its own merits.</div>
+  <div class="legend">
+    <div class="leg leg-cp"><div class="leg-title">Counter-productive</div><div class="leg-desc">Makes things worse</div></div>
+    <div class="leg leg-ie"><div class="leg-title">Ineffective</div><div class="leg-desc">Does not help</div></div>
+    <div class="leg leg-fe"><div class="leg-title">Fairly Effective</div><div class="leg-desc">Some help</div></div>
+    <div class="leg leg-eff"><div class="leg-title">Effective</div><div class="leg-desc">Resolves situation</div></div>
+  </div>
+  <div id="t-opts"></div>
+  <button class="btn btn-dark" id="btn-submit" disabled onclick="submitAnswer()">Submit ratings</button>
+</div>
+
+<div id="p-feedback" class="page">
+  <div class="prog-row">
+    <span class="prog-txt" id="f-prog">Scenario 1 of 9</span>
+    <span class="btag" id="f-beh">Behaviour</span>
+  </div>
+  <div class="pbar"><div class="pfill" id="f-fill" style="width:11%"></div></div>
+  <div id="fb-inner"><div class="loading"><div class="spin"></div>Generating feedback…</div></div>
+</div>
+
+<div id="p-results" class="page">
+  <h1>Test complete</h1>
+  <p id="r-grade" style="color:#888;margin-bottom:16px"></p>
+  <div class="ring"><div class="ring-p" id="r-pct"></div><div class="ring-s" id="r-pts"></div></div>
+  <div class="stats">
+    <div class="stat stat-g"><div class="stat-v" id="r-cor">0</div><div class="stat-l">All correct</div></div>
+    <div class="stat stat-m"><div class="stat-v" id="r-par">0</div><div class="stat-l">Partial</div></div>
+    <div class="stat stat-r"><div class="stat-v" id="r-wrg">0</div><div class="stat-l">Incorrect</div></div>
+  </div>
+  <div class="note-box">In the real CSJT, Part 2 accounts for 85% of your score and Part 1 (self-assessment) accounts for 15%. Scores are reported as a percentile against other applicants at the same job level.</div>
+  <button class="btn btn-dark" onclick="go('p-grade')">Practice another grade →</button>
+  <button class="btn btn-outline" onclick="restartSame()">Try same set again</button>
+</div>
+
+<script>
+var PASSWORD = "CSJT2025";
+
+function checkPw(){
+  var val=document.getElementById('pw-input').value.trim();
+  if(val===PASSWORD){
+    document.getElementById('p-gate').style.display='none';
+    go('p-landing');
+  } else {
+    document.getElementById('pw-error').textContent='Incorrect password. Please check your purchase confirmation.';
+    document.getElementById('pw-input').value='';
+    document.getElementById('pw-input').focus();
+  }
+}
+
+var SAQ=[
+  {text:"I always look for ways to take on more responsibility at work.",dim:"Ambition",exp:"This explores how proactively you seek growth. The Civil Service values ambition but expects it balanced with quality delivery in your current role."},
+  {text:"I find it easy to stay motivated even when tasks are repetitive or routine.",dim:"Engagement",exp:"Many civil service roles involve sustained, careful work. Consistent motivation signals reliability and commitment to delivery even when work is less stimulating."},
+  {text:"I adapt quickly when plans change unexpectedly.",dim:"Flexibility",exp:"Flexibility is critical in the Civil Service given frequently changing ministerial priorities. High scorers tend to embrace change rather than resist it."},
+  {text:"I prefer to have a clear plan before starting a task rather than figuring things out as I go.",dim:"Working Style",exp:"This explores your planning preferences. The Civil Service values structured thinking but also needs people who can act decisively with incomplete information."},
+  {text:"I find it energising to work collaboratively with others towards a shared goal.",dim:"Collaboration",exp:"The Civil Service's Working Together behaviour places high value on genuine collaboration. Strong team orientation is a positive indicator for most roles."}
+];
+
+var QS={
+  AO:[
+    {beh:"Working Together",sc:"You work in an administrative team processing benefit claims. A colleague, Priya, has been making errors recently. Your line manager is away all week. The mistakes are causing delays for claimants and additional work for the rest of the team.",opts:["Speak privately with Priya to let her know you have noticed the errors and ask if she needs any support.","Send an email to your line manager flagging the errors and asking them to deal with it when they return.","Quietly correct Priya's errors yourself to keep the work moving, without saying anything to her.","Complain to other colleagues about Priya's mistakes and how they are affecting the team."],cr:["Effective","Fairly Effective","Ineffective","Counterproductive"],ex:["Speaking privately with Priya is the most effective response. It addresses the issue directly and with empathy, gives her a chance to explain any difficulties, and may resolve the root cause.","Emailing your manager keeps them informed, which has value, but does nothing in the meantime. Claimants continue to be affected and Priya receives no support.","Silently fixing the errors means the underlying problem is never addressed. Priya cannot improve without feedback, and the situation is likely to continue.","Complaining to colleagues risks damaging Priya's reputation and creating a hostile atmosphere. It is contrary to Civil Service values and does nothing to resolve the problem."]},
+    {beh:"Making Effective Decisions",sc:"You are processing a grant application for a small community organisation. You notice it is missing a required supporting document. The decision deadline is tomorrow and your manager is in meetings all day.",opts:["Contact the applicant immediately to explain what is missing and request the document before the deadline.","Approve the application and note that you will chase the document next week.","Wait for your manager to be free and refer the decision entirely to them.","Reject the application and email the applicant explaining they can reapply in the next round."],cr:["Effective","Counterproductive","Ineffective","Fairly Effective"],ex:["Contacting the applicant immediately is effective. It is proactive, fair to the organisation, and ensures the decision is made on complete information.","Approving without the required document bypasses criteria and creates procedural risk. A decision made on incomplete evidence could be challenged.","Waiting for your manager when time-sensitive action is available is unnecessarily passive. Contacting an applicant is within your authority.","Rejection is defensible and respects published criteria, though proactive contact would be fairer to the applicant. Informing them of reapplication options partly mitigates this."]},
+    {beh:"Changing and Improving",sc:"You notice that a manual data entry task your team does every week could be largely automated using a tool already available on your work computer. Doing so would save around an hour of team time each week. No one has asked you to review this process.",opts:["Quietly automate the task yourself and say nothing — the result will speak for itself.","Raise the idea with your line manager, briefly explaining the potential time saving and how you would implement it.","Mention it to a colleague to sense-check the idea before taking it further.","Do nothing — suggesting changes to established processes is not part of your role."],cr:["Fairly Effective","Effective","Fairly Effective","Ineffective"],ex:["Automating without telling anyone might produce a good outcome, but bypasses proper channels and leaves your manager unaware of a change to team processes.","Raising the idea with your manager is the most effective response. It shows initiative, respects proper process, and gives your manager the information needed to approve or refine the change.","Checking with a colleague is a sensible informal step to refine your thinking, but on its own does not lead to change.","Doing nothing is ineffective. The Civil Service expects all staff to identify and suggest improvements at every grade."]},
+    {beh:"Delivering at Pace",sc:"You are responsible for processing a large batch of housing applications. It is Thursday afternoon and you realise that to meet Friday's deadline you would need to work through your lunch break and stay late. A colleague has already left due to illness. Your manager is working remotely.",opts:["Let your manager know straight away that the deadline is at risk given reduced capacity, and ask whether overtime or additional resource is available.","Say nothing and work through lunch and stay late to complete the batch on your own without telling anyone.","Send a message to your team group chat asking if anyone can help you with the remaining applications.","Process as many applications as you can in normal hours and leave the rest — the deadline was always ambitious."],cr:["Effective","Fairly Effective","Fairly Effective","Counterproductive"],ex:["Immediately alerting your manager is the most effective response. It gives them the information they need to make decisions about resource, priorities or deadline management.","Working through to complete the task shows commitment and is not wrong in itself. However, doing so without telling your manager means they have no visibility of the pressure you are under.","Asking teammates for help is a reasonable and collaborative step, though it may not be within your authority to redirect colleagues' work.","Simply leaving the work unfinished without flagging the risk is counterproductive. It is likely to cause knock-on problems and fails to demonstrate the delivery focus expected at AO level."]},
+    {beh:"Communicating and Influencing",sc:"You attend a team meeting where your manager explains a new way of logging casework. You think the new system will be more confusing than the existing one and could lead to errors. Some colleagues also seem uncertain but say nothing.",opts:["Say nothing in the meeting but tell colleagues afterwards that you think the new system is a bad idea.","Raise your concern respectfully during the meeting, explaining specifically what you think could go wrong and suggesting a question to clarify.","Follow the new system without comment — it is your manager's decision and not your place to question it.","Email your manager after the meeting to share your concern, describe the specific risk you have identified, and offer to discuss it."],cr:["Counterproductive","Effective","Ineffective","Effective"],ex:["Voicing concerns to colleagues but not to your manager is counterproductive. It undermines the decision without giving your manager the information they need to improve it.","Raising your concern respectfully in the meeting is effective. It gives your manager the chance to clarify or reconsider, and reflects good communication skills.","Saying nothing means a potential risk to data quality goes unaddressed. The Civil Service expects staff to speak up constructively when they see a problem.","Following up by email is equally effective — it communicates the same concern through an appropriate channel and gives your manager time to consider it."]},
+    {beh:"Managing a Quality Service",sc:"You are answering telephone enquiries for a government helpline. A caller becomes frustrated and begins speaking to you rudely after being told they must resubmit a form. They insist the requirement is unreasonable and ask to speak to your manager, who is not available.",opts:["End the call — you are not required to tolerate rudeness and the caller can ring back.","Stay calm, acknowledge the caller's frustration, explain the reason for the requirement clearly, and offer to arrange a callback from your manager.","Apologise and tell the caller you will waive the resubmission requirement this time to resolve the situation.","Stay calm and listen, but repeat the requirement firmly without explanation and tell the caller the decision is final."],cr:["Counterproductive","Effective","Counterproductive","Ineffective"],ex:["Ending the call fails to meet the standard of service the Civil Service expects. It is likely to generate a complaint and leaves the caller without the help they need.","Staying calm, acknowledging frustration, explaining the reason clearly, and arranging a manager callback is the most effective response.","Waiving a formal requirement to end a difficult call is counterproductive. It undermines process integrity and may set a precedent.","Repeating the requirement without explanation fails to help the caller understand the situation. While maintaining the requirement is correct, doing so without empathy is unhelpful."]},
+    {beh:"Working Together",sc:"You are part of a small project group tasked with drafting a new team induction pack. One member, Dan, consistently misses the group's agreed deadlines and has not completed his section. The pack is due to your manager in one week.",opts:["Complete Dan's section yourself so the pack is ready on time, without mentioning it to your manager.","Speak to Dan directly to find out whether there is a reason for the delays and agree a realistic plan to complete his section.","Tell your manager that Dan is not pulling his weight and ask for the deadline to be extended.","Submit the pack without Dan's section and note in your covering email that it is incomplete due to a team member not delivering."],cr:["Fairly Effective","Effective","Ineffective","Counterproductive"],ex:["Completing Dan's section ensures the deadline is met, but does not address the underlying issue. A fairly effective short-term fix that bypasses the real problem.","Speaking directly with Dan first is the most effective response. It gives him the opportunity to explain any difficulties and creates a plan to resolve the situation constructively before escalating.","Going straight to your manager without first speaking to Dan is disproportionate as a first step and may feel like reporting a colleague rather than solving the problem.","Submitting an incomplete pack and publicly attributing it to Dan in writing is counterproductive. It damages working relationships and fails to deliver what your manager needs."]},
+    {beh:"Making Effective Decisions",sc:"You are covering for a colleague and handling their caseload. You come across a case that appears straightforward but includes an unusual circumstance not covered by the standard guidance you have been given. You are not sure how it should be handled.",opts:["Apply the closest matching standard guidance and process the case — the unusual detail is probably not significant.","Set the case aside and wait for your colleague to return so they can deal with it themselves.","Flag the case to your manager or a more experienced colleague, explaining the unusual circumstance and asking for guidance before proceeding.","Process the case and make a note on the file that you were uncertain about the unusual element, so it can be reviewed later."],cr:["Ineffective","Ineffective","Effective","Fairly Effective"],ex:["Applying the closest guidance without flagging the uncertainty risks making an incorrect decision. Without knowing the significance of the unusual detail, proceeding is not sound judgement.","Setting the case aside may cause unnecessary delay and is not a good use of coverage arrangements, particularly if the colleague's return is not imminent.","Flagging to your manager or an experienced colleague before proceeding is the most effective response. It ensures the decision is made with appropriate expertise.","Processing with a note creates a partial record of your uncertainty but still risks an incorrect decision being acted upon. A fairly effective step that would be stronger combined with seeking guidance first."]},
+    {beh:"Delivering at Pace",sc:"You have three tasks to complete today: a routine report due at 5pm, responses to ten customer emails with no stated deadline, and an urgent data check your manager asked you to complete by 2pm. It is 9am and you estimate all three will take approximately the same amount of time.",opts:["Start with the customer emails as there are the most of them and clearing the backlog feels productive.","Start with the urgent data check, then the 5pm report, and fit the emails around these or carry them over to the next day if needed.","Ask your manager to clarify which task is the highest priority before starting anything.","Work on all three tasks simultaneously, switching between them to make progress on each."],cr:["Counterproductive","Effective","Ineffective","Ineffective"],ex:["Starting with the emails ignores the explicit deadline your manager has set for the data check. Prioritising volume over urgency is counterproductive and likely to result in missing a stated deadline.","Starting with the urgent data check, then the 5pm report, and using remaining time for emails is the most effective approach. It correctly prioritises by deadline and importance.","Asking your manager for clarification when the priority order is already clear is unnecessary and wastes time.","Switching between all three simultaneously reduces focus and increases the risk of errors across all tasks."]}
+  ],
+  EO:[
+    {beh:"Communicating and Influencing",sc:"You are leading a small project to update your team's internal guidance. In a team meeting, a senior colleague with 20 years' experience strongly criticised your approach, saying the existing process works fine. Others in the room seemed uncertain.",opts:["After the meeting, speak privately with the senior colleague to understand their concerns and share the evidence behind your proposal.","At the next team meeting, present your original proposal and ask the whole team to vote on whether to proceed.","Revise the proposal to incorporate all the senior colleague's suggestions, even where you disagree, to restore harmony.","Escalate immediately to your line manager and ask them to make the final call."],cr:["Effective","Fairly Effective","Ineffective","Ineffective"],ex:["A private one-to-one conversation is the most effective first step. It separates the disagreement from the public setting, allows genuine dialogue, and may surface valid concerns.","A team vote is a reasonable way to involve others, though doing it without first addressing the concern privately is likely to entrench positions.","Revising the proposal purely to avoid conflict compromises quality and signals a lack of conviction in your evidence.","Escalating immediately without attempting direct engagement is premature. Your manager should be a last resort for a professional disagreement of this nature."]},
+    {beh:"Seeing the Big Picture",sc:"Your director has announced a new ministerial priority requiring your team to change focus significantly for the next quarter. A project you have led for six months will be paused. Several colleagues are frustrated and feel their work has been wasted.",opts:["Help colleagues understand why the new priority matters and acknowledge the frustration about paused work, while committing fully to the new direction.","Carry on with your project quietly — pausing it now would waste six months of work and the new priority will still be met.","Raise concerns about the impact of the change through the appropriate channel, then commit fully once the decision is confirmed.","Tell colleagues privately that you also disagree with the decision, to show solidarity with the team."],cr:["Effective","Counterproductive","Fairly Effective","Counterproductive"],ex:["This is the most effective response. It demonstrates Seeing the Big Picture while also leading the team through a difficult transition with empathy.","Continuing in defiance of a confirmed organisational priority is counterproductive. It puts personal investment above the organisation's needs.","Raising concerns through the right channel before committing is fairly effective — it shows professional integrity, though it focuses on your own concerns rather than actively supporting colleagues.","Expressing private disagreement with a confirmed senior decision undermines team cohesion and your manager's position."]},
+    {beh:"Working Together",sc:"A colleague from a different team asks for your help on a piece of work that falls within your expertise. You are currently busy with your own deadlines. Your manager has not asked you to support other teams.",opts:["Decline — you have your own deadlines and helping could put your work at risk.","Agree to help fully and quietly deprioritise some of your own tasks without telling your manager.","Offer what support you can within your current capacity and be honest with your colleague about your constraints.","Let your manager know about the request and ask for their steer on how to balance it with your existing priorities."],cr:["Ineffective","Counterproductive","Effective","Fairly Effective"],ex:["Declining outright is unhelpful and does not reflect the Civil Service's expectation of cross-team collaboration.","Agreeing to help while hiding the impact on your own work is counterproductive. It risks both pieces of work suffering and undermines transparency.","Offering what support you can within your genuine capacity, while being honest about constraints, is the most effective response.","Checking with your manager is a sensible and fairly effective step, particularly where the request is significant."]},
+    {beh:"Making Effective Decisions",sc:"You are an EO responsible for processing complaints. You receive a borderline complaint that could reasonably be accepted or declined under the current policy. Your team has been under pressure to reduce the complaint caseload. Your manager has informally encouraged the team to use their judgement to close cases where possible.",opts:["Decline the complaint on the basis that closing cases is the team priority and your manager has encouraged this.","Accept the complaint — where there is genuine doubt, you should err on the side of the citizen.","Refer the case to your manager, setting out both sides of the argument clearly and asking for a steer before deciding.","Document your reasoning carefully and make the decision yourself based on a fair reading of the policy, without reference to caseload pressure."],cr:["Counterproductive","Fairly Effective","Fairly Effective","Effective"],ex:["Declining primarily because of caseload pressure rather than the merits of the case is counterproductive. It misuses discretion and could constitute an unfair decision that is later overturned.","Erring in favour of the citizen on a borderline case is a reasonable instinct and fairly effective, but it does not engage with the genuine ambiguity in the policy or document the reasoning clearly.","Referring to your manager with a clear summary of both arguments is also fairly effective. It shares the decision appropriately and ensures your manager is aware of the borderline nature of the case.","Making the decision yourself based on a careful, documented reading of the policy — independent of caseload pressure — is the most effective response."]},
+    {beh:"Delivering at Pace",sc:"You are coordinating a report that requires input from four colleagues. The deadline is in three days. Two colleagues have submitted their sections on time, but two have not responded despite two reminders. Without their input the report will be incomplete.",opts:["Submit the report with the sections you have, noting that two contributions are outstanding and explaining why.","Contact the two non-responding colleagues directly by phone or in person to explain the urgency and agree a firm deadline for their input.","Escalate to your manager now, explaining that two colleagues have not responded and asking them to intervene.","Draft placeholder content for the missing sections yourself, based on your best understanding, and submit the full report."],cr:["Ineffective","Effective","Fairly Effective","Counterproductive"],ex:["Submitting an incomplete report without first making a direct effort to chase the outstanding sections is an ineffective response. It accepts failure without exhausting available options.","Contacting the colleagues directly — by phone or in person — is the most effective response. It creates urgency and gives them a clear final opportunity to contribute.","Escalating to your manager is a fairly effective step, particularly if direct contact has already failed. It keeps your manager informed and may unlock additional pressure on the non-responsive colleagues.","Drafting content on behalf of colleagues without their input or knowledge is counterproductive. It risks factual errors and may produce a report that the contributors later disown."]},
+    {beh:"Changing and Improving",sc:"Your team processes planning applications using a paper-based tracking system that frequently results in applications being mislaid or duplicated. You have used a digital tracking tool in a previous role and believe it would solve the problem. Your manager has not raised this as a priority.",opts:["Set up the digital tracking tool for your own applications without telling anyone, to demonstrate how well it works.","Raise the issue with your manager, describing the current problem and the potential solution, and offer to research options or run a small pilot.","Mention the idea at the next team meeting to get colleagues' views before taking it further.","Write a short note to your manager setting out the frequency of errors in the current system and the cost to the team, and suggest a discussion about alternatives."],cr:["Counterproductive","Effective","Fairly Effective","Effective"],ex:["Setting up an unofficial system without permission is counterproductive. It creates inconsistency, bypasses governance, and could cause confusion about which system holds the authoritative record.","Raising the issue directly with your manager — with evidence of the problem and an offer to help find a solution — is fully effective.","Testing the idea with colleagues first is a fairly effective step that can build support and refine your thinking. On its own it does not advance the change.","A short written note setting out the evidence and suggesting a discussion is equally effective. It gives your manager something concrete to consider and creates a record of the issue being raised."]},
+    {beh:"Managing a Quality Service",sc:"You oversee a small team handling public correspondence. You notice that several letters sent last week contained the same factual error about eligibility criteria. The letters have already been sent. Around 40 people may have received incorrect information.",opts:["Do nothing for now — the error is minor and most people will probably not act on the incorrect information.","Inform your manager immediately, explain the scope of the error, and discuss whether a correction should be issued to the affected recipients.","Draft a correction letter to send to the 40 affected recipients and send it without telling your manager, to resolve the issue quickly.","Investigate how the error occurred, identify who approved the letters, and raise it as a process failure at the next team meeting."],cr:["Counterproductive","Effective","Fairly Effective","Ineffective"],ex:["Doing nothing on the assumption that the error will not cause harm is counterproductive. People may have made decisions based on incorrect information, and inaction could expose the department to complaints or legal challenge.","Informing your manager immediately and discussing the appropriate response is the most effective action. It ensures the right level of authority is involved in deciding how to correct the error.","Drafting and sending a correction quickly shows good instincts and is fairly effective in terms of outcome, but acting without informing your manager bypasses proper oversight of a potentially significant error.","Investigating the cause and raising it at a team meeting may be useful for preventing recurrence, but they do not address the immediate need to correct the misinformation already sent to the public."]},
+    {beh:"Developing Self and Others",sc:"You recently attended a training course on data analysis techniques that you found highly relevant to your team's work. None of your colleagues attended. You believe the skills would help the whole team work more efficiently, but your manager has not asked you to share what you learned.",opts:["Apply the techniques in your own work and say nothing — your colleagues can attend the course themselves if they are interested.","Prepare a short summary of the key techniques and offer to share them with your team at a convenient time, checking with your manager first.","Mention to your manager that you found the training valuable and suggest it might benefit the team, without committing to any specific action.","Organise an informal lunch session to walk your colleagues through what you learned, without clearing it with your manager first."],cr:["Ineffective","Effective","Fairly Effective","Fairly Effective"],ex:["Keeping the learning to yourself is ineffective. The Civil Service expects staff at EO level to actively contribute to the development of those around them.","Preparing a structured summary and offering to share it — with your manager's knowledge — is the most effective response.","Flagging the value of the training to your manager is a fairly effective step that opens a conversation about team development. However, it stops short of taking any concrete action.","Organising an informal session shows good collaborative instincts and is fairly effective in terms of outcome, but doing so without clearing it with your manager first bypasses appropriate oversight of team time."]},
+    {beh:"Seeing the Big Picture",sc:"You are working on a long-running project to improve your team's case management process. Partway through, your department announces a wider digital transformation programme that will replace the case management system entirely within 18 months. Your project lead has not yet commented on whether your project should continue.",opts:["Continue with the project as planned — your project lead has not told you to stop and the improvements may still be useful in the short term.","Raise the potential overlap with your project lead, setting out the implications clearly and asking for a decision on whether to continue, pause or redirect the work.","Stop work on the project immediately — it clearly duplicates the digital transformation programme and continuing would waste resources.","Reach out directly to the digital transformation team to understand their plans and find out whether your project's work could feed into their programme."],cr:["Ineffective","Effective","Counterproductive","Fairly Effective"],ex:["Continuing without raising the overlap is ineffective. It risks investing further effort in work that may be superseded, and fails to give your project lead the information they need to make a good decision.","Raising the potential overlap with your project lead and asking for a clear decision is the most effective response. It demonstrates Seeing the Big Picture and ensures resources are used wisely.","Stopping work immediately without authorisation is counterproductive. The short-term improvements may still have value, and the decision to pause or continue is not yours alone to make.","Reaching out to the digital transformation team is a fairly effective step — it gathers useful intelligence. However, it is most effective when done in conjunction with raising the issue with your own project lead."]}
+  ],
+  HEO:[
+    {beh:"Leadership",sc:"You manage a team of seven. You discover that James, a generally reliable team member, has been leaving an hour early most days for the past month without recording it or telling you. His work quality has not noticeably declined.",opts:["Have a private conversation with James to understand his circumstances, remind him of the expectation to record and notify absences, and agree a way forward.","Do nothing for now — James is performing well and raising it could affect his morale unnecessarily.","Refer the matter to HR immediately as an unrecorded absence issue, and copy your own manager.","Mention at the next team meeting that everyone must record absences properly, without naming James."],cr:["Effective","Counterproductive","Fairly Effective","Ineffective"],ex:["A private, proportionate conversation is the most effective response. You need to understand the circumstances, set clear expectations, and agree a way forward without overreacting.","Doing nothing sends a message that attendance rules are optional and undermines your credibility as a fair manager.","Involving HR is not wholly wrong — unrecorded absence is a real issue — but doing so without first having a conversation is disproportionate.","Raising it generically in a team meeting is indirect and passive-aggressive. It does not give James the opportunity to explain himself."]},
+    {beh:"Making Effective Decisions",sc:"A programme you are responsible for has fallen behind schedule. You have identified two options: Option A gets it back on track but requires redirecting budget from another approved workstream. Option B keeps all budgets in place but means the programme misses its delivery deadline.",opts:["Implement Option A straight away — the delivery deadline is the priority and you can explain the budget change to your manager afterwards.","Implement Option B — you do not have authority to move approved budget without sign-off.","Present both options to your manager with a clear recommendation, the evidence behind each, and a request for a timely decision.","Delay deciding while you explore whether a third option exists that avoids the trade-off entirely."],cr:["Counterproductive","Fairly Effective","Effective","Ineffective"],ex:["Redirecting approved budget without authorisation — however well-intentioned — is a governance breach and not within your authority.","Sticking with Option B respects financial governance and is the safer choice if escalation is not possible. However, it accepts a delivery failure without fully exploiting your position to find a better outcome.","Presenting both options with a clear recommendation is the most effective response. It maintains proper governance and positions your manager to make an authorised decision quickly.","Delaying to find a third option compounds the problem in a programme already behind schedule."]},
+    {beh:"Developing Self and Others",sc:"Sofia is a talented team member who has been passed over for promotion twice. Her technical skills are strong but feedback consistently highlights that she struggles to communicate complex ideas to non-specialist audiences. She has not raised this with you.",opts:["Wait for Sofia to raise it herself — giving unsolicited feedback on something this personal feels intrusive.","Raise the development area directly with Sofia in her next one-to-one, sharing the specific feedback and agreeing a development plan together.","Recommend Sofia for a communications skills course without explaining the specific feedback behind the suggestion.","Address communication skills as a general team development theme in your next team meeting, so Sofia receives the message without being singled out."],cr:["Ineffective","Effective","Fairly Effective","Counterproductive"],ex:["Waiting for Sofia to raise it means she continues without the information she needs to develop. Supporting her development is a core part of your role as her manager.","Raising it directly in a one-to-one with specific feedback and a jointly agreed development plan is the most effective response.","Suggesting a course is a partial step — better than doing nothing, but less effective than a direct conversation that gives Sofia the full picture.","Framing personal feedback as a general team theme is vague, likely obvious to others, and does not give Sofia the specific insight she needs. It is counterproductive to her development."]},
+    {beh:"Working Together",sc:"You are coordinating a cross-team working group. Two of the five teams involved have consistently sent junior staff to meetings without the authority to make decisions, causing delays. The next meeting is in a week and the working group needs to agree a final recommendation.",opts:["Raise the issue directly with the leads of the two teams before the meeting, explaining the impact of the attendance pattern and asking them to attend or send a decision-maker.","Send an email to all working group participants reminding everyone of the need to send appropriately senior representatives.","Proceed with the next meeting regardless — if the relevant teams send junior staff again you will make decisions in their absence.","Escalate the problem to your manager and ask them to contact the leads of the two teams on your behalf."],cr:["Effective","Fairly Effective","Counterproductive","Ineffective"],ex:["Speaking directly with the leads of the two teams before the meeting is the most effective approach. It is targeted, respectful, and gives them a clear opportunity to resolve the issue before the next session.","A reminder email to all participants is a reasonable step and may prompt the relevant teams to reconsider. However, it is less targeted than a direct conversation.","Proceeding and making decisions in the absence of key stakeholders is counterproductive. It risks producing recommendations that lack buy-in and cannot be implemented without the agreement of the missing teams.","Escalating to your manager without first attempting direct engagement is premature and places the burden on someone senior for what is within your authority to resolve."]},
+    {beh:"Delivering at Pace",sc:"You are managing a small policy team with a tight deadline to produce a briefing for ministers. Two days before the deadline, a key team member goes off sick unexpectedly. The remaining team members are already working at full capacity. The briefing is complex and cannot be shortened without losing important content.",opts:["Inform your manager of the situation immediately and discuss whether the deadline can be extended, additional resource provided, or the scope adjusted.","Redistribute the absent team member's work among the remaining team without telling your manager, to avoid worrying them unnecessarily.","Ask for volunteers from other teams to provide additional short-term support, without first checking with your manager.","Deliver the briefing on time by reducing its scope, without informing the minister's office that key content has been omitted."],cr:["Effective","Counterproductive","Fairly Effective","Counterproductive"],ex:["Informing your manager immediately is the most effective response. It gives them the information needed to make decisions about the deadline, scope, or resource.","Quietly redistributing the work without telling your manager is counterproductive. It leaves them uninformed about a significant risk to a ministerial deadline.","Seeking additional resource from other teams is a fairly effective instinct, though doing so without your manager's knowledge first bypasses their oversight.","Reducing the scope of a ministerial briefing without telling the minister's office that key content has been omitted is counterproductive. It may mislead decision-makers."]},
+    {beh:"Communicating and Influencing",sc:"You need to introduce a new way of recording performance data that will require your team of eight to change how they complete their weekly returns. You know from experience that at least two team members are resistant to process changes and tend to influence others' views in team meetings.",opts:["Announce the change at a full team meeting, explain the reasons clearly, and invite questions.","Speak individually with the two resistant team members before the all-team announcement, address their concerns privately, and invite them to help shape the implementation.","Implement the new recording system without a formal announcement — team members will adapt once they see it in place.","Send a written briefing to the whole team explaining the change, the rationale, and the timeline, and invite written questions."],cr:["Fairly Effective","Effective","Counterproductive","Fairly Effective"],ex:["Announcing the change at a full team meeting is fairly effective but does not pre-empt the influence of the resistant team members who may shape others' reactions negatively in the room.","Engaging the resistant team members individually beforehand is the most effective approach. It addresses their concerns before they can influence others, and involving them in implementation gives them ownership.","Implementing without explanation is counterproductive. It is likely to generate confusion, resistance, and errors.","A written briefing is fairly effective — it is clear and documented — but like option A, it does not address the specific dynamic of the influential resistant team members."]},
+    {beh:"Changing and Improving",sc:"You are responsible for your team's quality assurance process. You have noticed over several months that the same types of errors keep appearing in your team's outputs — suggesting a systemic gap in the process rather than individual mistakes. Your manager has not asked you to review the QA process.",opts:["Speak to each team member individually about the recurring errors and remind them of the quality standards expected.","Analyse the pattern of errors to identify the root cause, then present your findings and a proposed solution to your manager.","Redesign the QA process yourself and roll it out to the team without consulting your manager, as improving quality is part of your remit.","Raise the pattern of errors with your manager as a concern, without yet having a proposed solution, to flag that the issue exists."],cr:["Ineffective","Effective","Counterproductive","Fairly Effective"],ex:["Speaking to individuals about errors that have a systemic cause is ineffective. It misdiagnoses the problem and will not address the root cause.","Analysing the error pattern to identify the root cause and presenting a solution to your manager is the most effective response. It is evidence-based, solution-focused, and properly escalated.","Redesigning the process without consulting your manager is counterproductive even if improving quality is within your remit. Significant process changes should be agreed, not imposed unilaterally.","Flagging the concern to your manager without a proposed solution is a fairly effective step — it ensures they are aware of the issue. However, it falls short of the level of analysis and initiative expected of an HEO."]},
+    {beh:"Seeing the Big Picture",sc:"You are managing a team delivering a public-facing digital service. Your team has recently met its monthly performance targets for the first time after a difficult period. However, user satisfaction scores — which are not currently included in your targets — have been declining steadily. Your manager has praised the team's recent performance.",opts:["Say nothing — your team has met its targets and flagging declining satisfaction scores might undermine the positive mood.","Raise the declining user satisfaction trend with your manager, alongside the positive performance data, and suggest that satisfaction scores should be factored into future targets.","Task your team with investigating the reasons for declining satisfaction scores and present the findings to your manager once the picture is clearer.","Update your team's targets independently to include user satisfaction metrics, so the team is working to a fuller picture of performance."],cr:["Counterproductive","Effective","Fairly Effective","Counterproductive"],ex:["Saying nothing because the mood is positive is counterproductive. A service that meets its targets but is losing user satisfaction is not truly performing well.","Raising both the positive performance data and the declining satisfaction trend with your manager — and suggesting it be factored into future targets — is the most effective response.","Investigating the causes before raising the issue is a fairly effective step. It means you will have better information to bring to your manager, though it does introduce some delay.","Independently updating your team's targets without your manager's agreement is counterproductive. Target-setting should involve the appropriate level of sign-off."]},
+    {beh:"Managing a Quality Service",sc:"You manage a team that processes licensing applications. A recent audit has found that your team's average processing time is significantly above the department's standard. On investigation, you find that two specific team members account for most of the delay. The other five team members are processing at or above the required standard.",opts:["Brief all eight team members on the audit findings and set new team-wide targets for processing time.","Speak individually with the two team members whose performance is below standard, share the data clearly, understand any reasons for the delay, and agree an improvement plan.","Refer both underperforming team members to HR for formal performance management immediately.","Reassign the most complex cases away from the two underperforming team members so their processing times improve without the need for a difficult conversation."],cr:["Ineffective","Effective","Fairly Effective","Counterproductive"],ex:["Briefing the whole team when only two members are underperforming is ineffective. It misattributes a specific problem to everyone and may demoralise the five team members who are performing well.","Speaking individually with the two team members — sharing the data, understanding the reasons, and agreeing an improvement plan — is the most effective response.","Referring to HR for formal performance management is a fairly effective option if informal approaches have already been tried and failed. As a first step it may be disproportionate.","Reassigning cases to mask the performance gap without addressing the underlying issue is counterproductive. It reduces the team's overall capacity and is unfair to higher-performing colleagues."]}
+  ],
+  SEO:[
+    {beh:"Leadership",sc:"You lead a newly merged team. Members of the two original teams are resistant to working together and there is visible tension in meetings. Productivity has started to fall. You have heard from one team member that the tension stems from a disagreement about working practices during the merger.",opts:["Address the tension at the next all-team meeting, making clear that collaboration is non-negotiable and everyone must move forward.","Speak individually with key members of each team to understand the root causes before deciding how to respond.","Give the team more time to adjust — post-merger tension usually resolves naturally once people get to know each other.","Redesign the workflow so the two groups primarily work alongside each other on joint tasks, creating forced interaction."],cr:["Fairly Effective","Effective","Counterproductive","Fairly Effective"],ex:["Addressing it at a team meeting sets a clear leadership tone but risks being perceived as dismissive without first understanding the root causes.","Speaking individually with key members is the most effective first step. It surfaces the real causes of tension and allows a targeted, informed response.","Waiting and hoping the tension resolves itself while productivity declines is counterproductive. Unaddressed conflict in merged teams rarely self-resolves.","Designing joint working opportunities is a constructive structural approach but does not address the specific disagreement driving the tension. Most effective as a complement to direct conversations."]},
+    {beh:"Seeing the Big Picture",sc:"You are finalising a ministerial submission your team has worked on for eight months. Two days before the deadline, you identify that a recent court ruling has significant legal implications for one section — something your team had not previously picked up.",opts:["Submit on time, noting the court ruling briefly in a footnote so ministers are at least aware of it.","Immediately flag the issue to your director and legal team, and agree how to handle it before submitting.","Request a short extension, revise the affected section with legal input, and resubmit.","Remove the affected section from the submission and note that further work on that element is still ongoing."],cr:["Counterproductive","Effective","Fairly Effective","Fairly Effective"],ex:["Submitting something you know to be legally uncertain with a footnote as cover risks misleading ministers and exposes the department to legal and reputational risk.","Immediately escalating to your director and legal team is the most effective response. It ensures the right people decide how to proceed and demonstrates integrity and sound senior judgement.","Requesting an extension and revising with legal input is a strong, fairly effective approach — provided the extension can be agreed quickly.","Removing the affected section is also fairly effective if an extension is not possible. It is transparent and avoids submitting legally uncertain content."]},
+    {beh:"Communicating and Influencing",sc:"You need agreement from two other senior teams to change a shared process that causes significant delays in your area. The other teams benefit from the current arrangement and have previously resisted change. You have strong data supporting your case.",opts:["Write a formal paper setting out the case for change with supporting data and circulate it to all relevant teams for comment.","Speak individually with the leads of the other teams before any formal process, to understand their concerns and explore shared interests.","Escalate to a shared senior manager and ask them to direct the change, given the history of resistance.","Implement the change within your own team's part of the process and present the other teams with the results as a fait accompli."],cr:["Fairly Effective","Effective","Ineffective","Counterproductive"],ex:["A formal paper with data is a reasonable step but circulating it without prior individual engagement is likely to harden resistance. More effective as a follow-up to private conversations.","Speaking individually with the other leads first is the most effective approach. It builds relationships, uncovers concerns, and gives you the opportunity to co-design a solution.","Escalating before attempting direct engagement is premature and may damage working relationships. It should be a last resort.","Implementing changes unilaterally in a shared process is counterproductive. It entrenches opposition, damages trust, and makes future collaboration harder."]},
+    {beh:"Making Effective Decisions",sc:"You are heading a team responsible for a grant scheme. An applicant has submitted a strong proposal scoring highly against the published criteria, but you have concerns — based on information not formally part of the assessment — that the organisation may lack the capacity to deliver. None of the formal criteria address delivery capacity.",opts:["Award the grant — the applicant has met all published criteria and you cannot apply criteria that were not in the published guidance.","Decline the grant on the basis of your concerns about delivery capacity, without recording your reasoning formally.","Pause the decision, seek advice from your director and legal team about whether your concerns can legitimately be taken into account, and document your reasoning fully.","Award the grant but attach additional monitoring conditions to mitigate the delivery risk you have identified."],cr:["Fairly Effective","Counterproductive","Effective","Fairly Effective"],ex:["Awarding the grant on the basis of the published criteria is a fairly effective and defensible decision. It respects the process applicants were asked to follow. However, it does not address the delivery risk you have identified.","Declining the grant on undisclosed grounds without formal reasoning is counterproductive. It is likely to be legally challengeable and undermines the integrity of the assessment process.","Pausing to seek legal and director-level advice — and documenting your reasoning fully — is the most effective response. It ensures the decision is made with appropriate expertise and protects the department.","Awarding with additional monitoring conditions is a fairly effective middle-ground approach. It honours the published process while mitigating the delivery risk."]},
+    {beh:"Delivering at Pace",sc:"You are overseeing three workstreams all with significant deadlines in the next fortnight. You realise your team lacks the capacity to deliver all three to the required standard simultaneously. One is ministerially sensitive, one has legal compliance implications, and one has been promised to a key external stakeholder.",opts:["Push the team to deliver all three workstreams to full standard, accepting that some team members may need to work significant overtime.","Assess the risk profile of each workstream, identify which can absorb some reduction in quality or timeline, and escalate a clear options paper to your director with a recommendation.","Quietly deprioritise the external stakeholder workstream without informing them — it is the least sensitive of the three and they are unlikely to escalate.","Ask each workstream lead to identify what can be delivered to a reduced standard and manage the situation at team level without involving your director."],cr:["Ineffective","Effective","Counterproductive","Fairly Effective"],ex:["Pushing the team to deliver everything in full without additional resource or adjusted expectations is ineffective. It is likely to result in burnout, errors across all workstreams, and a failure to deliver any of them to the required standard.","Assessing the risk profile of each workstream and escalating a clear options paper to your director is the most effective response. It demonstrates sound judgement and proper governance.","Quietly deprioritising the external stakeholder workstream without informing them is counterproductive. It damages trust and risks reputational harm when the stakeholder realises.","Asking workstream leads to identify reductions and managing at team level is a fairly effective step. However, decisions of this significance warrant director-level visibility."]},
+    {beh:"Working Together",sc:"You are co-leading a cross-departmental programme with an SEO from another department. There is a disagreement between your teams about which department should own a key deliverable. Both teams believe ownership sits with the other. The programme board is expecting a joint update in two weeks.",opts:["Draft a programme update that assigns ownership of the deliverable to the other department's team, based on your reading of the original programme scope.","Speak directly with your co-lead to agree ownership between you, using the programme scope and any relevant governance documents to resolve the dispute.","Escalate the ownership dispute to the programme board, letting them decide who is responsible for the deliverable.","Begin work on the deliverable yourself to fill the gap, without resolving the ownership question formally."],cr:["Counterproductive","Effective","Fairly Effective","Fairly Effective"],ex:["Unilaterally assigning ownership to the other department in a written update — without their agreement — is counterproductive. It is likely to be contested and damages the co-leadership relationship.","Speaking directly with your co-lead to agree ownership, using the programme scope and governance documents, is the most effective response. It resolves the dispute at the right level and maintains the collaborative relationship.","Escalating to the programme board is a fairly effective step if bilateral discussion fails. The board has the authority to resolve the dispute.","Beginning work on the deliverable to fill the gap is also fairly effective in terms of keeping the programme moving. However, without resolving ownership formally, it creates ambiguity about accountability."]},
+    {beh:"Changing and Improving",sc:"You are responsible for a team that has been using the same approach to stakeholder engagement for several years. External feedback and your own observation suggest the approach is no longer effective — stakeholders are less engaged and the quality of their input to your work has declined. Your director has not asked you to review the engagement approach.",opts:["Continue with the current approach — the director has not indicated it is a problem and changing it without being asked could be seen as overstepping.","Develop a revised engagement strategy, pilot it with one or two stakeholders, and present the evidence to your director with a proposal to adopt it more widely.","Replace the existing engagement approach across all stakeholders immediately, as it is clearly within your remit to manage stakeholder relationships.","Raise your concerns about the effectiveness of the current approach with your director, share the external feedback, and offer to develop options for improvement."],cr:["Counterproductive","Effective","Counterproductive","Fairly Effective"],ex:["Continuing with an approach you know is not working because the director has not raised it is counterproductive. At SEO level you are expected to identify and act on strategic risks without waiting to be asked.","Developing a revised strategy, piloting it, and presenting the evidence to your director is the most effective approach. It is initiative-driven, evidence-based, and properly escalated before full implementation.","Replacing the approach across all stakeholders without director-level sign-off is counterproductive. A strategic change of this scope requires appropriate governance and visibility.","Raising your concerns with your director and offering to develop options is a fairly effective step. However, it falls short of the initiative and solution-focus expected at SEO level."]},
+    {beh:"Managing a Quality Service",sc:"Your team is responsible for a public-facing service that has seen a significant increase in demand. Processing times have lengthened and user satisfaction has dropped. Your team is working at full capacity. A minister's office has asked for an urgent update on the situation.",opts:["Send the minister's office an optimistic update focused on the steps the team is taking, without disclosing the full extent of the processing delays or satisfaction decline.","Provide the minister's office with an honest and accurate update — including the extent of the delays and satisfaction decline — alongside your analysis of the causes and options for addressing the situation.","Ask your director to provide the update to the minister's office, as the situation is above your level to report on directly.","Introduce a temporary triage system to prioritise the most urgent cases, inform users of expected delays, and include these steps in your update to the minister's office."],cr:["Counterproductive","Effective","Ineffective","Fairly Effective"],ex:["Providing an optimistic update that conceals the true position is counterproductive. It risks misleading a minister and will likely unravel when the full picture emerges, undermining the trust fundamental to Civil Service integrity.","Providing an honest, accurate, and analytical update — including the extent of the problem and the options for addressing it — is the most effective response. It demonstrates the impartial, evidence-based advisory standard the Civil Service requires.","Deferring the update to your director without a substantive contribution is ineffective. Producing clear, accurate briefings for ministers is within your remit at SEO level.","Introducing a triage system and communicating proactively with users are fairly effective operational steps that demonstrate service quality thinking."]},
+    {beh:"Developing Self and Others",sc:"You manage a team of five SEOs and HEOs. One of your HEOs, Marcus, is technically strong and well-regarded but has expressed no interest in promotion and consistently declines development opportunities. You have recently been asked by your director to identify future talent across your team.",opts:["Exclude Marcus from your talent assessment — he has made his intentions clear and including him against his wishes would be inappropriate.","Have a conversation with Marcus to understand his motivations and longer-term ambitions before completing your talent assessment, and share your own observations about his potential.","Include Marcus in your talent assessment as a high performer without discussing it with him first — the assessment is a management process and does not require his consent.","Report to your director that Marcus is not suitable for inclusion as he has shown no interest in development or progression."],cr:["Ineffective","Effective","Fairly Effective","Counterproductive"],ex:["Excluding Marcus without a conversation is ineffective. His current position may reflect a lack of confidence, limited awareness of opportunities, or circumstances that could change.","Having a genuine conversation with Marcus — to understand his motivations and share your observations about his potential — is the most effective response. It respects his autonomy and ensures your talent assessment is based on full information.","Including Marcus in the assessment without discussion is a fairly effective step that fulfils the management requirement. However, doing so without first having a conversation means you may be acting on incomplete information.","Reporting to your director that Marcus is unsuitable without first having a conversation is counterproductive. It forecloses a conversation that might reveal significant potential."]}
+  ]
+};
+
+var RC={"Effective":"eff","Fairly Effective":"fe","Ineffective":"ie","Counterproductive":"cp"};
+var RBTN={"Counterproductive":"a-cp","Ineffective":"a-ie","Fairly Effective":"a-fe","Effective":"a-eff"};
+var RBLOCK={"Effective":"r-eff","Fairly Effective":"r-fe","Ineffective":"r-ie","Counterproductive":"r-cp"};
+var grade=null,qs=[],qi=0,scores=[],ratings={},saA={};
+
+function go(id){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
+  document.getElementById(id).classList.add('on');
+  window.scrollTo(0,0);
+}
+
+function pickGrade(g){
+  grade=g;
+  document.querySelectorAll('.gcard').forEach(function(c){c.classList.remove('sel');});
+  document.getElementById('gc-'+g).classList.add('sel');
+  document.getElementById('btn-grade').disabled=false;
+}
+
+function startPart1(){
+  saA={};
+  var c=document.getElementById('sa-qs');
+  c.innerHTML='';
+  SAQ.forEach(function(q,i){
+    var d=document.createElement('div');
+    d.className='sa-q';
+    var lbls='<div class="sa-lbls"><span>Completely Disagree</span><span>Completely Agree</span></div>';
+    var nums='<div class="sa-nums">';
+    for(var v=1;v<=7;v++) nums+='<div class="sa-num" id="sn-'+i+'-'+v+'" onclick="pickSA('+i+','+v+')">'+v+'</div>';
+    nums+='</div>';
+    d.innerHTML='<div class="sa-qt">'+(i+1)+'. '+q.text+'</div>'+lbls+nums;
+    c.appendChild(d);
+  });
+  document.getElementById('btn-sa').disabled=true;
+  go('p-part1');
+}
+
+function pickSA(qi,v){
+  saA[qi]=v;
+  for(var n=1;n<=7;n++){
+    var el=document.getElementById('sn-'+qi+'-'+n);
+    if(el) el.className='sa-num'+(n===v?' sel':'');
+  }
+  document.getElementById('btn-sa').disabled=Object.keys(saA).length<SAQ.length;
+}
+
+function submitSA(){
+  var c=document.getElementById('sa-fb');
+  c.innerHTML='';
+  SAQ.forEach(function(q,i){
+    var v=saA[i]||'—';
+    var lbl=v<=2?'Strongly disagree':v<=3?'Disagree':v===4?'Neutral':v<=5?'Agree':'Strongly agree';
+    var d=document.createElement('div');
+    d.className='card';
+    d.innerHTML='<h2>'+q.dim+'</h2><p style="font-style:italic;color:#666;margin-bottom:6px">"'+q.text+'"</p><p style="color:#1D9E75;font-weight:700;font-size:13px;margin-bottom:6px">Your answer: '+v+'/7 — '+lbl+'</p><p>'+q.exp+'</p>';
+    c.appendChild(d);
+  });
+  go('p-part1-fb');
+}
+
+function startPart2(){
+  qs=QS[grade];
+  qi=0; scores=[];
+  loadQ();
+  go('p-test');
+}
+
+function restartSame(){ startPart1(); }
+
+function setBar(prog,fill){
+  var pct=Math.round(((qi+1)/qs.length)*100);
+  document.getElementById(prog).textContent='Scenario '+(qi+1)+' of '+qs.length;
+  document.getElementById(fill).style.width=pct+'%';
+}
+
+function loadQ(){
+  var q=qs[qi];
+  ratings={};
+  document.getElementById('t-beh').textContent=q.beh;
+  document.getElementById('t-scenario').textContent=q.sc;
+  setBar('t-prog','t-fill');
+  document.getElementById('btn-submit').disabled=true;
+  var c=document.getElementById('t-opts');
+  c.innerHTML='';
+  var letters=['A','B','C','D'];
+  q.opts.forEach(function(text,idx){
+    var block=document.createElement('div');
+    block.className='opt';
+    block.id='opt-'+idx;
+    block.innerHTML=
+      '<div class="opt-top"><div class="opt-letter" id="ol-'+idx+'">'+letters[idx]+'</div><div class="opt-text">'+text+'</div></div>'+
+      '<div class="rated-strip" id="rs-'+idx+'"></div>'+
+      '<div class="rbtns">'+
+        '<button class="rbtn" id="rb-'+idx+'-0" onclick="rate('+idx+',\'Counterproductive\',0)">Counter-<br>productive</button>'+
+        '<button class="rbtn" id="rb-'+idx+'-1" onclick="rate('+idx+',\'Ineffective\',1)">Ineffective</button>'+
+        '<button class="rbtn" id="rb-'+idx+'-2" onclick="rate('+idx+',\'Fairly Effective\',2)">Fairly<br>Effective</button>'+
+        '<button class="rbtn" id="rb-'+idx+'-3" onclick="rate('+idx+',\'Effective\',3)">Effective</button>'+
+      '</div>';
+    c.appendChild(block);
+  });
+}
+
+function rate(idx,rating,rIdx){
+  for(var r=0;r<4;r++) document.getElementById('rb-'+idx+'-'+r).className='rbtn';
+  if(ratings[idx]===rating){
+    delete ratings[idx];
+    document.getElementById('opt-'+idx).className='opt';
+    document.getElementById('rs-'+idx).textContent='';
+  } else {
+    ratings[idx]=rating;
+    document.getElementById('rb-'+idx+'-'+rIdx).className='rbtn '+RBTN[rating];
+    document.getElementById('opt-'+idx).className='opt '+RBLOCK[rating];
+    document.getElementById('rs-'+idx).textContent='Rated: '+rating;
+  }
+  document.getElementById('btn-submit').disabled=Object.keys(ratings).length<qs[qi].opts.length;
+}
+
+function submitAnswer(){
+  var q=qs[qi];
+  document.getElementById('f-beh').textContent=q.beh;
+  setBar('f-prog','f-fill');
+  document.getElementById('fb-inner').innerHTML='<div class="loading"><div class="spin"></div>Generating your coaching feedback…</div>';
+  go('p-feedback');
+  var correct=0,desc='';
+  q.opts.forEach(function(o,i){
+    var g=ratings[i]||'not rated';
+    desc+='Option '+['A','B','C','D'][i]+': user rated "'+g+'", correct is "'+q.cr[i]+'". ';
+    if(ratings[i]===q.cr[i]) correct++;
+  });
+  var ok=correct===q.opts.length,par=!ok&&correct>=2;
+  scores.push(ok?2:par?1:0);
+  var expText='';
+  q.opts.forEach(function(o,i){ expText+='Option '+['A','B','C','D'][i]+' [correct: '+q.cr[i]+']: '+q.ex[i]+'\n'; });
+  var prompt='You are an expert coach for the UK Civil Service Judgement Test (CSJT).\nKey rule: candidates rate each action independently and CAN give the same rating to more than one action — this is by design.\nScenario: '+q.sc+'\nBehaviour: '+q.beh+'\n'+desc+'\nCandidate got '+correct+' out of 4 correct.\nCorrect ratings with explanations:\n'+expText+'\nWrite a concise coaching response (3-4 paragraphs, under 220 words). Cover: 1) How the candidate did. 2) The Civil Service principle this scenario tests, referencing '+q.beh+'. 3) The reasoning behind the correct ratings — where two options share a rating, explain why. 4) One practical tip. Plain prose only, no bullet points, be direct and encouraging.';
+
+  fetch('/.netlify/functions/claude',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1000,
+      messages:[{role:'user',content:prompt}]
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(d){showFb(q,ok,par,d.content&&d.content[0]?d.content[0].text:null);})
+  .catch(function(){showFb(q,ok,par,null);});
+}
+
+function showFb(q,ok,par,ai){
+  var cls=ok?'fb-correct':par?'fb-partial':'fb-wrong';
+  var title=ok?'All four ratings correct':par?'Partially correct — some ratings matched':'Incorrect — review the explanations below';
+  var html='<div class="fb-banner '+cls+'">'+title+'</div>';
+  html+='<div class="pills"><div class="pills-lbl">Correct ratings</div>';
+  q.cr.forEach(function(r,i){ html+='<span class="pill pill-'+RC[r]+'">Option '+['A','B','C','D'][i]+' — '+r+'</span>'; });
+  html+='</div>';
+  if(ai){
+    var ps=ai.split(/\n\n+/).filter(function(p){return p.trim();});
+    html+='<div class="coach"><div class="coach-lbl">Coaching insight</div>';
+    ps.forEach(function(p){html+='<p>'+p.replace(/\n/g,' ')+'</p>';});
+    html+='</div>';
+  }
+  html+='<div class="exps-lbl">Option by option</div>';
+  q.opts.forEach(function(o,i){
+    var rc=RC[q.cr[i]]||'fe';
+    html+='<div class="exp exp-'+rc+'"><div class="exp-lbl">Option '+['A','B','C','D'][i]+' — '+q.cr[i]+'</div><p>'+q.ex[i]+'</p></div>';
+  });
+  var last=qi+1>=qs.length;
+  html+='<button class="btn btn-dark" style="margin-top:14px" onclick="nextQ()">'+(last?'See my results →':'Next scenario →')+'</button>';
+  document.getElementById('fb-inner').innerHTML=html;
+}
+
+function nextQ(){
+  if(qi+1<qs.length){qi++;loadQ();go('p-test');}
+  else showResults();
+}
+
+function showResults(){
+  var total=scores.length,max=total*2,cor=0,par=0,wrg=0,sum=0;
+  scores.forEach(function(s){sum+=s;if(s===2)cor++;else if(s===1)par++;else wrg++;});
+  var names={AO:'AO/AA Grade',EO:'Executive Officer',HEO:'Higher Executive Officer',SEO:'Senior Executive Officer'};
+  document.getElementById('r-grade').textContent=names[grade]+' practice set';
+  document.getElementById('r-pct').textContent=Math.round((sum/max)*100)+'%';
+  document.getElementById('r-pts').textContent=sum+'/'+max+' pts';
+  document.getElementById('r-cor').textContent=cor;
+  document.getElementById('r-par').textContent=par;
+  document.getElementById('r-wrg').textContent=wrg;
+  go('p-results');
+}
+</script>
+</body>
+</html>
